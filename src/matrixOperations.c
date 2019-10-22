@@ -374,3 +374,24 @@ void matrixRotateVector(vec4 point, GLfloat theta, GLfloat cosX, GLfloat sinX, G
 	matrixTranslation(point[0],point[1],point[2], temp1);
 	matrixMultiplication(temp3, temp1,  m);
 }
+
+void ortho(vec4 lrb, vec4 tnf, mat4 m) {
+	identityMatrix(m);
+	m[0] = 2/(lrb[1]-lrb[0]);
+	m[5] = 2/(tnf[0]-lrb[2]);
+	m[10] = 2/(tnf[1]-tnf[2]);
+	m[12] = -(lrf[1]+lrf[0])/2;
+	m[13] = -(tnf[0]-lrb[2])/2;
+	m[14] = -(tnf[1]+tnf[2])/2;
+}
+
+void frustum(vec4 lrb, vec4 tnf, mat4 m) {
+	identityMatrix(m);
+	m[0] = (-2*tnf[1])/(lrb[1]-lrb[0]);
+	m[5] = (-2*tnf[1])/(tnf[0]-lrb[2]);
+	m[8] = (lrb[0]+lrb[1])/(lrb[1]-lrb[0]);
+	m[9] = (lrb[2]+tnf[0])/(tnf[0]-lrb[2]);
+	m[10] = (tnf[1]+tnf[2])/(tnf[2]-tnf[1]);
+	m[11] = -1;
+	m[15] = (2*tnf[1]*tnf[2])/(tnf[2]-tnf[1]);
+}

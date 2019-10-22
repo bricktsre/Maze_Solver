@@ -9,17 +9,17 @@ CP = -Wall
 CFLAGS = -I$(IDIR) -lXi -lXmu -lglut -lGLEW -lGLU -lm -lGL
 
 # header dependencies
-_DEPS = initShader.h matrixOperations.h
+_DEPS = initShader.h matrixOperations.h mazeGenerator.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 # object files
 ODIR = obj
-_OBJ = initShader.o matrixOperations.o
+_OBJ = initShader.o matrixOperations.o mazeGenerator.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 all: maze
 
-maze: mazeGenerator.c #$(OBJ)
+maze: maze.c $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(CP)
 
 $(ODIR)/%.o: %.c $(IDIR)/%.h
