@@ -338,7 +338,7 @@ void matrixRotateZ(GLfloat theta, mat4 m) {
 
 void matrixRotateVector(vec4 point, GLfloat theta, GLfloat cosX, GLfloat sinX, GLfloat cosY, GLfloat sinY, mat4 m){
 	mat4 temp1, temp2, temp3;
-	matrixTranslation(-point[0],-point[1],-point[2], temp1);
+	matrixTranslation(point[0],point[1],point[2], temp1);
 
 	identityMatrix(temp2);
 	temp2[5] = cosX;
@@ -371,8 +371,39 @@ void matrixRotateVector(vec4 point, GLfloat theta, GLfloat cosX, GLfloat sinX, G
 	temp1[10] = cosX;
 	matrixMultiplication(temp2, temp1, temp3);
 	
-	matrixTranslation(point[0],point[1],point[2], temp1);
+	matrixTranslation(-point[0],-point[1],-point[2], temp1);
 	matrixMultiplication(temp3, temp1,  m);
+}
+
+void lookAt(vec4 e, vec4 a, vec4 vup, mat4 m) {
+	vec4 n, u, v;
+	vectorSubtraction(e,a,n);
+	vectorNormalize(n,n);
+	
+	vectorCrossProduct(vup,n,u);
+	vectorNormalize(u,u);
+
+	vectorCrossProduct(n,u,v);
+	
+	identityMatrix(m);
+	m[0] = u[0];
+	m[4] = u[1];
+	m[8] = u[2];
+	m[1] = v[0];
+	m[5] = v[1];
+	m[9] = v[2];
+	m[2] = n[0];
+	m[6] = n[1];
+	m[10] = n[2];
+	m[3] = e[0];
+	m[7] = e[1];
+	m[11] = e[2];
+	printMatrix(m);
+	mat4 temp;
+	matrixTranspose(m, temp);
+	printMatrix(temp);
+	matrixInverse(temp, m);
+	printMatrix(m);
 }
 
 void ortho(vec4 lrb, vec4 tnf, mat4 m) {
@@ -380,9 +411,9 @@ void ortho(vec4 lrb, vec4 tnf, mat4 m) {
 	m[0] = 2/(lrb[1]-lrb[0]);
 	m[5] = 2/(tnf[0]-lrb[2]);
 	m[10] = 2/(tnf[1]-tnf[2]);
-	m[12] = -(lrf[1]+lrf[0])/2;
-	m[13] = -(tnf[0]-lrb[2])/2;
-	m[14] = -(tnf[1]+tnf[2])/2;
+	m[12] = -(lrb[1]+lrb[0])/(lrb[1]-lrb[0]);
+	m[13] = -(tnf[0]+lrb[2])/(tnf[0]-lrb[2]);
+	m[14] = -(tnf[1]+tnf[2])/(tnf[1]-tnf[2]);
 }
 
 void frustum(vec4 lrb, vec4 tnf, mat4 m) {
@@ -393,5 +424,6 @@ void frustum(vec4 lrb, vec4 tnf, mat4 m) {
 	m[9] = (lrb[2]+tnf[0])/(tnf[0]-lrb[2]);
 	m[10] = (tnf[1]+tnf[2])/(tnf[2]-tnf[1]);
 	m[11] = -1;
-	m[15] = (2*tnf[1]*tnf[2])/(tnf[2]-tnf[1]);
+	m[14] = -(2*tnf[1]*tnf[2])/(tnf[2]-tnf[1]);
+	m[15] = 1;
 }
