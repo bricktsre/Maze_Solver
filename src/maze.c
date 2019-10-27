@@ -51,7 +51,7 @@ vec4 cube_vertices[36] = {
 	{0.0,0.0,0.0,1.0},{0.0,0.0,-1.0,1.0},{1.0,0.0,-1.0,1.0},
 	{0.0,0.0,0.0,1.0},{1.0,0.0,-1.0,1.0},{1.0,0.0,0.0,1.0},
 };
-vec2 tex_coords[36] = {
+vec2 wall_tex_coords[36] = {
 	{0.0,0.0},{0.0,0.5},{0.5,0.5},{0.0,0.0},{0.5,0.5},{0.5,0.0},
 	{0.0,0.0},{0.0,0.5},{0.5,0.5},{0.0,0.0},{0.5,0.5},{0.5,0.0},
 	{0.0,0.0},{0.0,0.5},{0.5,0.5},{0.0,0.0},{0.5,0.5},{0.5,0.0},
@@ -60,25 +60,59 @@ vec2 tex_coords[36] = {
 	{0.0,0.0},{0.0,0.5},{0.5,0.5},{0.0,0.0},{0.5,0.5},{0.5,0.0},
 };	
 
-void fill(vec4 *vertices) {
-	int i, v_index = 0;
-	mat4 trans, rotate, copy;
-	matrixTranslation(-0.5,-0.5,0.0, trans);
-	matrixRotateX(M_PI/4, rotate);
-	matrixMultiplication(trans, rotate, copy);
+void makeWall(vec4 *vertices, vec2 *textures, int *v_index, int *t_index, int row, int col, int horiz){
+	int i;
+	mat4 trans, scale, copy;
+	matrixTranslation(col*1,0,row*-1,trans);
+	matrixScale(1.0,1.0,0.25,scale);
+	matrixMultiplication(trans,scale,copy);
+	if(horiz){
+		mat4 temp1, temp2;
+		matrixRotateY(M_PI/2,temp1);
+		matrixMultiplication(copy,temp1,temp2);
+		matrixCopy(temp2,copy);
+	}
 	vec4 temp;
 	for(i = 0; i<36; i++){
                 matrixVectorMultiplication(copy,cube_vertices[i],temp);
-		vectorCopy(temp, vertices[v_index]);
-                v_index++;
-        }
+		vectorCopy(temp, vertices[*v_index]);
+		textures[*t_index][0] = wall_tex_coords[i][0];
+		textures[*t_index][1] = wall_tex_coords[i][1];
+                (*v_index)++;
+		(*t_index)++;
+        }	
+}
+
+void fill(int maze[][17], vec4 *vertices, vec2 *textures) {
+	int v_index = 0, t_index = 0, row = 0, col=0, i, j;
+	for(i=0;i<17;i++){
+		for(j=0;j<17;j++){
+			int square = maze[i][j];
+			if(square == 0) continue;
+			if(square == 2) continue;
+			if(square == 1){
+				makeWall(vertices,textures,&v_index,&t_index,row,col,0);
+				col++;
+			}if(square == 3){
+				makeWall(vertices,textures,&v_index,&t_index,row,col,1);
+				col++;
+			}
+			if(col == 8){
+				row++;
+				col = 0;
+			}
+		}
+	}
 }
 
 void init(void)
 {
-	num_vertices = 36;
+	int maze[17][17];
+	makeMaze(maze);
+	num_vertices = 5796;
 	vec4 vertices[num_vertices];
-	fill(vertices);
+	vec2 textures[num_vertices];
+	fill(maze,vertices,textures);
 	//vec4 colors[num_vertices];
 
 	int width = 800;
@@ -111,9 +145,9 @@ void init(void)
 	GLuint buffer;
 	glGenBuffers(1, &buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices)+ sizeof(tex_coords)/* + sizeof(colors)*/, NULL, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices)+ sizeof(textures)/* + sizeof(colors)*/, NULL, GL_STATIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertices), sizeof(tex_coords), tex_coords); 
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertices), sizeof(textures), textures); 
 	//glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertices), sizeof(colors), colors);
 
 	GLuint vPosition = glGetAttribLocation(program, "vPosition");
@@ -132,7 +166,14 @@ void init(void)
 	glUniform1i(texture_location, 0);
 
 	identityMatrix(model_view);
-	identityMatrix(projection);
+	vec4 e = {0.0,2.0,1.0,0.0};
+	vec4 a = {0.0,0.0,0.0,0.0};
+	vec4 vup = {0.0,1.0,0.0,0.0};
+	//lookAt(e,a,vup,model_view);
+	//identityMatrix(projection);
+	vec4 lrb = {-1.0,2.0,-1.0,0.0};
+	vec4 tnf = {2.0,1.0,-5.0,0.0};
+	ortho(lrb,tnf,projection);
 	identityMatrix(ctm);
 	model_view_location = glGetUniformLocation(program, "model_view_matrix");
 	projection_location = glGetUniformLocation(program, "projection_matrix");
@@ -173,7 +214,7 @@ void idle(void) {
 	matrixRotateY(theta, temp);
 	matrixMultiplication( temp, ctm, copy);
 	matrixCopy(copy, ctm);
-	glutPostRedisplay();
+	//glutPostRedisplay();
 }
 
 int main(int argc, char **argv)

@@ -398,12 +398,12 @@ void lookAt(vec4 e, vec4 a, vec4 vup, mat4 m) {
 	m[3] = e[0];
 	m[7] = e[1];
 	m[11] = e[2];
-	printMatrix(m);
+	//printMatrix(m);
 	mat4 temp;
 	matrixTranspose(m, temp);
-	printMatrix(temp);
+	//printMatrix(temp);
 	matrixInverse(temp, m);
-	printMatrix(m);
+	//printMatrix(m);
 }
 
 void ortho(vec4 lrb, vec4 tnf, mat4 m) {

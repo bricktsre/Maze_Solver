@@ -17,13 +17,17 @@ void makeMaze(int maze[][17]) {
 
 void mazeInit(int maze[][17]) {
 	int i, j;
+	for(i = 0; i < 17; i++){
+		for(j = 0; j < 17; j++)
+			maze[i][j] = 0;
+	}
 	for(i = 0; i < 17; i+=17-1){
 		for(j = 0; j < 17; j++)
 			maze[i][j] = 1;
 	}
 	for(i = 0; i < 17; i+=17-1){
-		for(j = 0; j < 17; j++)
-			maze[j][i] = 1;
+		for(j = 1; j < 16; j++)
+			maze[j][i] = 3;
 	}	
 }
 
@@ -88,28 +92,28 @@ int extendWall(int direction, int row, int col, int maze[][17]) {
 	if( direction == 0){
 		row--;
 		while( row >= 0){
-			if( maze[row][col] == 1) return row;
-			maze[row][col] = 1;
+			if( maze[row][col] == 1 || maze[row][col] == 3) return row;
+			maze[row][col] = 3;
 			row--;
 		}
 	} else if( direction == 1) {
 		col++;
 		while( col < 17){
-			if( maze[row][col] == 1) return col;
+			if( maze[row][col] == 1 || maze[row][col] == 3) return col;
 			maze[row][col] = 1;
 			col++;
 		}
 	} else if( direction == 2) {
 		row++;
 		while( row < 17){
-			if( maze[row][col] == 1) return row;
-			maze[row][col] = 1;
+			if( maze[row][col] == 1 || maze[row][col] == 3) return row;
+			maze[row][col] = 3;
 			row++;
 		}
 	} else {
 		col--;
 		while( col >= 0){
-			if( maze[row][col] == 1) return col;
+			if( maze[row][col] == 1 || maze[row][col] == 3) return col;
 			maze[row][col] = 1;
 			col--;
 		}
@@ -132,7 +136,7 @@ void printMaze(int maze[][17]) {
 			if( val == 0)
 				printf(" ");
 			else
-				printf("%i", maze[i][j]);
+				printf("%d", val);
 		}
 		printf("\n");
 	}
