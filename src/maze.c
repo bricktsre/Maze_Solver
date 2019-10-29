@@ -59,19 +59,29 @@ vec2 wall_tex_coords[36] = {
 	{0.0,0.0},{0.0,0.5},{0.5,0.5},{0.0,0.0},{0.5,0.5},{0.5,0.0},
 	{0.0,0.0},{0.0,0.5},{0.5,0.5},{0.0,0.0},{0.5,0.5},{0.5,0.0},
 };	
+vec2 post_tex_coords[36] = {
+	{0.5,0.0},{0.5,0.5},{1.0,0.5},{0.5,0.0},{1.0,0.5},{1.0,0.0},
+	{0.5,0.0},{0.5,0.5},{1.0,0.5},{0.5,0.0},{1.0,0.5},{1.0,0.0},
+	{0.5,0.0},{0.5,0.5},{1.0,0.5},{0.5,0.0},{1.0,0.5},{1.0,0.0},
+	{0.5,0.0},{0.5,0.5},{1.0,0.5},{0.5,0.0},{1.0,0.5},{1.0,0.0},
+	{0.5,0.0},{0.5,0.5},{1.0,0.5},{0.5,0.0},{1.0,0.5},{1.0,0.0},
+	{0.5,0.0},{0.5,0.5},{1.0,0.5},{0.5,0.0},{1.0,0.5},{1.0,0.0},
+};	
+vec2 floor_tex_coords[36] = {
+	{0.0,0.5},{0.0,1.0},{0.5,1.0},{0.0,0.5},{0.5,1.0},{0.5,0.5},
+	{0.0,0.5},{0.0,1.0},{0.5,1.0},{0.0,0.5},{0.5,1.0},{0.5,0.5},
+	{0.0,0.5},{0.0,1.0},{0.5,1.0},{0.0,0.5},{0.5,1.0},{0.5,0.5},
+	{0.0,0.5},{0.0,1.0},{0.5,1.0},{0.0,0.5},{0.5,1.0},{0.5,0.5},
+	{0.0,0.5},{0.0,1.0},{0.5,1.0},{0.0,0.5},{0.5,1.0},{0.5,0.5},
+	{0.0,0.5},{0.0,1.0},{0.5,1.0},{0.0,0.5},{0.5,1.0},{0.5,0.5},
+};	
 
-void makeWall(vec4 *vertices, vec2 *textures, int *v_index, int *t_index, int row, int col, int horiz){
+void makeWall(vec4 *vertices, vec2 *textures, int *v_index, int *t_index, int row, int col){
 	int i;
 	mat4 trans, scale, copy;
-	matrixTranslation(col*1,0,row*-1,trans);
+	matrixTranslation((col*1)-4.0,0,row*-1,trans);
 	matrixScale(1.0,1.0,0.25,scale);
 	matrixMultiplication(trans,scale,copy);
-	if(horiz){
-		mat4 temp1, temp2;
-		matrixRotateY(M_PI/2,temp1);
-		matrixMultiplication(copy,temp1,temp2);
-		matrixCopy(temp2,copy);
-	}
 	vec4 temp;
 	for(i = 0; i<36; i++){
                 matrixVectorMultiplication(copy,cube_vertices[i],temp);
@@ -83,26 +93,82 @@ void makeWall(vec4 *vertices, vec2 *textures, int *v_index, int *t_index, int ro
         }	
 }
 
+void makeWallRotated(vec4 *vertices, vec2 *textures, int *v_index, int *t_index, int row, int col){
+	int i;
+	mat4 trans, scale, rotate, copy, temp1;
+	matrixTranslation((col*1)-4.0,0.0,row*-1,trans);
+	matrixScale(1.0,1.0,0.25,scale);
+	matrixMultiplication(trans,scale,temp1);
+	matrixRotateY(M_PI/2,rotate);
+	matrixMultiplication(temp1,rotate,copy);
+	vec4 temp;
+	for(i = 0; i<36; i++){
+                matrixVectorMultiplication(copy,cube_vertices[i],temp);
+		vectorCopy(temp, vertices[*v_index]);
+		textures[*t_index][0] = wall_tex_coords[i][0];
+		textures[*t_index][1] = wall_tex_coords[i][1];
+                (*v_index)++;
+		(*t_index)++;
+        }	
+}
+
+void makePost(vec4 *vertices, vec2 *textures, int *v_index, int *t_index, int row, int col){
+	int i;
+	mat4 trans, scale, copy;
+	matrixTranslation((col*1)-4.15,0.0,(row*-1)+0.05,trans);
+	matrixScale(0.3,1.0,0.3,scale);
+	matrixMultiplication(trans,scale,copy);
+	vec4 temp;
+	for(i = 0; i<36; i++){
+                matrixVectorMultiplication(copy,cube_vertices[i],temp);
+		vectorCopy(temp, vertices[*v_index]);
+		textures[*t_index][0] = post_tex_coords[i][0];
+		textures[*t_index][1] = post_tex_coords[i][1];
+                (*v_index)++;
+		(*t_index)++;
+        }	
+
+}
+void makeFloor(vec4 *vertices, vec2 *textures, int *v_index, int *t_index){
+	int i;
+	mat4 trans, scale, copy;
+	matrixTranslation(-4.5,-0.25,0.5,trans);
+	matrixScale(9.0,0.25,9.0,scale);
+	matrixMultiplication(trans,scale,copy);
+	vec4 temp;
+	for(i = 0; i<36; i++){
+                matrixVectorMultiplication(copy,cube_vertices[i],temp);
+		vectorCopy(temp, vertices[*v_index]);
+		textures[*t_index][0] = floor_tex_coords[i][0];
+		textures[*t_index][1] = floor_tex_coords[i][1];
+                (*v_index)++;
+		(*t_index)++;
+        }	
+
+}
+
 void fill(int maze[][17], vec4 *vertices, vec2 *textures) {
 	int v_index = 0, t_index = 0, row = 0, col=0, i, j;
 	for(i=0;i<17;i++){
 		for(j=0;j<17;j++){
 			int square = maze[i][j];
+			//fprintf(stderr,"val: %d row: %d col: %d\n", square, i/2, j/2);
 			if(square == 0) continue;
-			if(square == 2) continue;
-			if(square == 1){
-				makeWall(vertices,textures,&v_index,&t_index,row,col,0);
+			if(square == 2) {
+				makePost(vertices,textures,&v_index,&t_index,i/2,j/2);
+			} if(square == 1){
+				makeWall(vertices,textures,&v_index,&t_index,i/2,j/2);
 				col++;
-			}if(square == 3){
-				makeWall(vertices,textures,&v_index,&t_index,row,col,1);
+			} if(square == 3){
+				makeWallRotated(vertices,textures,&v_index,&t_index,i/2,j/2);
 				col++;
-			}
-			if(col == 8){
+			} if(col == 8){
 				row++;
 				col = 0;
 			}
 		}
 	}
+	makeFloor(vertices,textures,&v_index,&t_index);
 }
 
 void init(void)
@@ -166,14 +232,14 @@ void init(void)
 	glUniform1i(texture_location, 0);
 
 	identityMatrix(model_view);
-	vec4 e = {0.0,2.0,1.0,0.0};
-	vec4 a = {0.0,0.0,0.0,0.0};
+	vec4 e = {0.0,0.0,1.25,0.0};
+	vec4 a = {0.0,0.0,0,0.0};
 	vec4 vup = {0.0,1.0,0.0,0.0};
-	//lookAt(e,a,vup,model_view);
+	lookAt(e,a,vup,model_view);
 	//identityMatrix(projection);
-	vec4 lrb = {-1.0,2.0,-1.0,0.0};
-	vec4 tnf = {2.0,1.0,-5.0,0.0};
-	ortho(lrb,tnf,projection);
+	vec4 lrb = {-2.5,2.5,-0.5,0.0};
+	vec4 tnf = {1.0,-1.0,-8.5,0.0};
+	frustum(lrb,tnf,projection);
 	identityMatrix(ctm);
 	model_view_location = glGetUniformLocation(program, "model_view_matrix");
 	projection_location = glGetUniformLocation(program, "projection_matrix");
@@ -223,7 +289,7 @@ int main(int argc, char **argv)
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitWindowSize(512, 512);
 	glutInitWindowPosition(100,100);
-	glutCreateWindow("Triangle");
+	glutCreateWindow("Maze");
 	glewInit();
 	init();
 	glutDisplayFunc(display);
