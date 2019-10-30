@@ -80,7 +80,7 @@ void makeWall(vec4 *vertices, vec2 *textures, int *v_index, int *t_index, int ro
 	int i;
 	mat4 trans, scale, copy;
 	matrixTranslation((col*1)-4.0,0,row*-1,trans);
-	matrixScale(1.0,1.0,0.25,scale);
+	matrixScale(1.0,1.0,0.2,scale);
 	matrixMultiplication(trans,scale,copy);
 	vec4 temp;
 	for(i = 0; i<36; i++){
@@ -96,11 +96,11 @@ void makeWall(vec4 *vertices, vec2 *textures, int *v_index, int *t_index, int ro
 void makeWallRotated(vec4 *vertices, vec2 *textures, int *v_index, int *t_index, int row, int col){
 	int i;
 	mat4 trans, scale, rotate, copy, temp1;
-	matrixTranslation((col*1)-4.0,0.0,row*-1,trans);
-	matrixScale(1.0,1.0,0.25,scale);
-	matrixMultiplication(trans,scale,temp1);
+	matrixTranslation((col*1)-3.75,0.0,row*-1,trans);
 	matrixRotateY(M_PI/2,rotate);
-	matrixMultiplication(temp1,rotate,copy);
+	matrixMultiplication(trans,rotate,temp1);
+	matrixScale(1.0,1.0,0.2,scale);
+	matrixMultiplication(temp1,scale,copy);
 	vec4 temp;
 	for(i = 0; i<36; i++){
                 matrixVectorMultiplication(copy,cube_vertices[i],temp);
@@ -115,7 +115,7 @@ void makeWallRotated(vec4 *vertices, vec2 *textures, int *v_index, int *t_index,
 void makePost(vec4 *vertices, vec2 *textures, int *v_index, int *t_index, int row, int col){
 	int i;
 	mat4 trans, scale, copy;
-	matrixTranslation((col*1)-4.15,0.0,(row*-1)+0.05,trans);
+	matrixTranslation((col*1)-4.0,0.0,(row*-1)+0.05,trans);
 	matrixScale(0.3,1.0,0.3,scale);
 	matrixMultiplication(trans,scale,copy);
 	vec4 temp;
@@ -232,14 +232,14 @@ void init(void)
 	glUniform1i(texture_location, 0);
 
 	identityMatrix(model_view);
-	vec4 e = {0.0,0.0,1.25,0.0};
-	vec4 a = {0.0,0.0,0,0.0};
-	vec4 vup = {0.0,1.0,0.0,0.0};
+	vec4 e = {0.0,2.0,-4.0,0.0};
+	vec4 a = {0.0,0.0,-4,0.0};
+	vec4 vup = {0.0,0.0,-1.0,0.0};
 	lookAt(e,a,vup,model_view);
 	//identityMatrix(projection);
-	vec4 lrb = {-2.5,2.5,-0.5,0.0};
-	vec4 tnf = {1.0,-1.0,-8.5,0.0};
-	frustum(lrb,tnf,projection);
+	vec4 lrb = {-4.5,4.5,-4.5,0.0};
+	vec4 tnf = {4.5,1.0,-8.5,0.0};
+	ortho(lrb,tnf,projection);
 	identityMatrix(ctm);
 	model_view_location = glGetUniformLocation(program, "model_view_matrix");
 	projection_location = glGetUniformLocation(program, "projection_matrix");

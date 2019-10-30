@@ -190,7 +190,7 @@ void matrixInverse(mat4 a, mat4 m) {
 	m[4] =-1*( (a[1]*a[10]*a[15])+(a[9]*a[14]*a[3])+(a[13]*a[2]*a[11])-(a[3]*a[10]*a[13])-(a[11]*a[14]*a[1])-(a[15]*a[2]*a[9]));
 	m[5] = (a[0]*a[10]*a[15])+(a[8]*a[14]*a[3])+(a[12]*a[2]*a[11])-(a[3]*a[10]*a[12])-(a[11]*a[14]*a[0])-(a[15]*a[2]*a[8]);
 	m[6] = -1*((a[0]*a[9]*a[15])+(a[8]*a[13]*a[3])+(a[12]*a[1]*a[11])-(a[3]*a[9]*a[12])-(a[11]*a[13]*a[0])-(a[15]*a[1]*a[8]));
-	m[10] = (a[0]*a[9]*a[14])+(a[8]*a[13]*a[2])+(a[12]*a[1]*a[10])-(a[2]*a[9]*a[12])-(a[10]*a[13]*a[0])-(a[14]*a[1]*a[8]);
+	m[7] = (a[0]*a[9]*a[14])+(a[8]*a[13]*a[2])+(a[12]*a[1]*a[10])-(a[2]*a[9]*a[12])-(a[10]*a[13]*a[0])-(a[14]*a[1]*a[8]);
 	m[8] = (a[1]*a[6]*a[15])+(a[5]*a[14]*a[3])+(a[13]*a[2]*a[7])-(a[3]*a[6]*a[13])-(a[7]*a[14]*a[1])-(a[15]*a[2]*a[5]);
 	m[9] = -1*((a[0]*a[6]*a[15])+(a[4]*a[14]*a[3])+(a[12]*a[2]*a[7])-(a[3]*a[6]*a[12])-(a[7]*a[14]*a[0])-(a[15]*a[2]*a[4]));
 	m[10] = (a[0]*a[5]*a[15])+(a[4]*a[13]*a[3])+(a[12]*a[1]*a[7])-(a[3]*a[5]*a[12])-(a[7]*a[13]*a[0])-(a[15]*a[1]*a[4]);
@@ -377,6 +377,8 @@ void matrixRotateVector(vec4 point, GLfloat theta, GLfloat cosX, GLfloat sinX, G
 
 void lookAt(vec4 e, vec4 a, vec4 vup, mat4 m) {
 	vec4 n, u, v;
+	identityMatrix(m);
+	if(vectorMagnitude(e) == 0) return;
 	vectorSubtraction(e,a,n);
 	vectorNormalize(n,n);
 	
@@ -384,8 +386,7 @@ void lookAt(vec4 e, vec4 a, vec4 vup, mat4 m) {
 	vectorNormalize(u,u);
 
 	vectorCrossProduct(n,u,v);
-	
-	identityMatrix(m);
+
 	m[0] = u[0];
 	m[4] = u[1];
 	m[8] = u[2];
