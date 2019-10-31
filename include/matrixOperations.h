@@ -58,4 +58,10 @@ void matrixRotateZ(GLfloat theta, mat4 m);
 
 void matrixRotateVector(vec4 point, GLfloat theta, GLfloat cosX, GLfloat sinX, GLfloat cosY, GLfloat sinY, mat4 m);
 
+void lookAt(vec4 e, vec4 a, vec4 vup, mat4 m);
+
+void ortho(vec4 lrb, vec4 tnf, mat4 m);
+
+void frustum(vec4 lrb, vec4 tnf, mat4 m);
+
 #endif

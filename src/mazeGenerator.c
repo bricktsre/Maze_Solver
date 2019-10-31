@@ -5,38 +5,42 @@
 
 // Generates a random correct maze
 // 0 is an empty walkable space, 1 is a wall, 2 is a post
-void makeMaze(int maze[][cols]) {
+void makeMaze(int maze[][17]) {
 	mazeInit(maze);
 	srand(time(0));
-	mazeRecursive(0,rows-1,0,cols-1,maze);
+	mazeRecursive(0,17-1,0,17-1,maze);
 	maze[1][0] = 0;
-	maze[rows-2][cols-1] = 0;
+	maze[17-2][17-1] = 0;
 	addPosts(maze);
-	printMaze(maze);
+	//printMaze(maze);
 }
 
-void mazeInit(int maze[][cols]) {
+void mazeInit(int maze[][17]) {
 	int i, j;
-	for(i = 0; i < rows; i+=rows-1){
-		for(j = 0; j < cols; j++)
+	for(i = 0; i < 17; i++){
+		for(j = 0; j < 17; j++)
+			maze[i][j] = 0;
+	}
+	for(i = 0; i < 17; i+=17-1){
+		for(j = 0; j < 17; j++)
 			maze[i][j] = 1;
 	}
-	for(i = 0; i < cols; i+=cols-1){
-		for(j = 0; j < rows; j++)
-			maze[j][i] = 1;
+	for(i = 0; i < 17; i+=17-1){
+		for(j = 1; j < 16; j++)
+			maze[j][i] = 3;
 	}	
 }
 
-void addPosts(int maze[][cols]) {
+void addPosts(int maze[][17]) {
 	int i,j;
-	for(i = 0; i < rows; i++){
-		for(j = 0; j < cols; j++)
+	for(i = 0; i < 17; i++){
+		for(j = 0; j < 17; j++)
 			if(j%2 == 0 && i%2 == 0)
 				maze[i][j] = 2;
 	}
 }	
 
-void mazeRecursive(int rowStart, int rowEnd, int colStart, int colEnd, int maze[][cols]) {
+void mazeRecursive(int rowStart, int rowEnd, int colStart, int colEnd, int maze[][17]) {
 	if( !((rowEnd - rowStart) > 2) || !((colEnd - colStart) > 2)) return;	
 	int pointRow = pickPoint(rowStart, rowEnd);
 	int pointCol = pickPoint(colStart, colEnd);
@@ -53,7 +57,7 @@ void mazeRecursive(int rowStart, int rowEnd, int colStart, int colEnd, int maze[
 	mazeRecursive(pointRow, rowEnd, colStart, pointCol, maze);
 }
 
-void removeWallSegments(int pointRow, int pointCol, int up, int right, int down, int left, int maze[][cols]) {
+void removeWallSegments(int pointRow, int pointCol, int up, int right, int down, int left, int maze[][17]) {
 	int skip_val = rand() % 4;
 	while(1){
 		if(skip_val != 0)
@@ -69,7 +73,7 @@ void removeWallSegments(int pointRow, int pointCol, int up, int right, int down,
 }
 
 // rowOrCol is a boolean, 0 = row, 1 = col
-void removeWallSegment(int start, int end, int rowOrCol, int other, int maze[][cols]) {
+void removeWallSegment(int start, int end, int rowOrCol, int other, int maze[][17]) {
 	int val = (rand() % ((end-1) - (start+1) + 1 )) + (start + 1);
 	if( val % 2 == 0)
 		val--;
@@ -83,33 +87,33 @@ void removeWallSegment(int start, int end, int rowOrCol, int other, int maze[][c
 }
 
 // 0 = Up, 1 = Right, 2 = Down, 3 = Left
-int extendWall(int direction, int row, int col, int maze[][cols]) {
+int extendWall(int direction, int row, int col, int maze[][17]) {
 	//printf("Point: %i, %i\n", row, col);
 	if( direction == 0){
 		row--;
 		while( row >= 0){
-			if( maze[row][col] == 1) return row;
-			maze[row][col] = 1;
+			if( maze[row][col] == 1 || maze[row][col] == 3) return row;
+			maze[row][col] = 3;
 			row--;
 		}
 	} else if( direction == 1) {
 		col++;
-		while( col < cols){
-			if( maze[row][col] == 1) return col;
+		while( col < 17){
+			if( maze[row][col] == 1 || maze[row][col] == 3) return col;
 			maze[row][col] = 1;
 			col++;
 		}
 	} else if( direction == 2) {
 		row++;
-		while( row < rows){
-			if( maze[row][col] == 1) return row;
-			maze[row][col] = 1;
+		while( row < 17){
+			if( maze[row][col] == 1 || maze[row][col] == 3) return row;
+			maze[row][col] = 3;
 			row++;
 		}
 	} else {
 		col--;
 		while( col >= 0){
-			if( maze[row][col] == 1) return col;
+			if( maze[row][col] == 1 || maze[row][col] == 3) return col;
 			maze[row][col] = 1;
 			col--;
 		}
@@ -124,26 +128,26 @@ int pickPoint(int low, int high) {
 	return val;
 }
 
-void printMaze(int maze[][cols]) {
+void printMaze(int maze[][17]) {
 	int i,j;
-	for(i = 0; i < rows; i++){
-		for(j = 0; j < cols; j++){
+	for(i = 0; i < 17; i++){
+		for(j = 0; j < 17; j++){
 			int val = maze[i][j];
 			if( val == 0)
 				printf(" ");
 			else
-				printf("%i", maze[i][j]);
+				printf("%d", val);
 		}
 		printf("\n");
 	}
 }
-
+/*
 int main(int argc, char ** argv) {
-	int maze[rows][cols];
+	int maze[17][17];
 	int i, j;
-	for(i = 0; i < rows; i++){
-		for(j = 0; j < cols; j++)
+	for(i = 0; i < 17; i++){
+		for(j = 0; j < 17; j++)
 			maze[i][j] = 0;
 	}
 	makeMaze(maze);
-}
+}*/

@@ -190,7 +190,7 @@ void matrixInverse(mat4 a, mat4 m) {
 	m[4] =-1*( (a[1]*a[10]*a[15])+(a[9]*a[14]*a[3])+(a[13]*a[2]*a[11])-(a[3]*a[10]*a[13])-(a[11]*a[14]*a[1])-(a[15]*a[2]*a[9]));
 	m[5] = (a[0]*a[10]*a[15])+(a[8]*a[14]*a[3])+(a[12]*a[2]*a[11])-(a[3]*a[10]*a[12])-(a[11]*a[14]*a[0])-(a[15]*a[2]*a[8]);
 	m[6] = -1*((a[0]*a[9]*a[15])+(a[8]*a[13]*a[3])+(a[12]*a[1]*a[11])-(a[3]*a[9]*a[12])-(a[11]*a[13]*a[0])-(a[15]*a[1]*a[8]));
-	m[10] = (a[0]*a[9]*a[14])+(a[8]*a[13]*a[2])+(a[12]*a[1]*a[10])-(a[2]*a[9]*a[12])-(a[10]*a[13]*a[0])-(a[14]*a[1]*a[8]);
+	m[7] = (a[0]*a[9]*a[14])+(a[8]*a[13]*a[2])+(a[12]*a[1]*a[10])-(a[2]*a[9]*a[12])-(a[10]*a[13]*a[0])-(a[14]*a[1]*a[8]);
 	m[8] = (a[1]*a[6]*a[15])+(a[5]*a[14]*a[3])+(a[13]*a[2]*a[7])-(a[3]*a[6]*a[13])-(a[7]*a[14]*a[1])-(a[15]*a[2]*a[5]);
 	m[9] = -1*((a[0]*a[6]*a[15])+(a[4]*a[14]*a[3])+(a[12]*a[2]*a[7])-(a[3]*a[6]*a[12])-(a[7]*a[14]*a[0])-(a[15]*a[2]*a[4]));
 	m[10] = (a[0]*a[5]*a[15])+(a[4]*a[13]*a[3])+(a[12]*a[1]*a[7])-(a[3]*a[5]*a[12])-(a[7]*a[13]*a[0])-(a[15]*a[1]*a[4]);
@@ -338,7 +338,7 @@ void matrixRotateZ(GLfloat theta, mat4 m) {
 
 void matrixRotateVector(vec4 point, GLfloat theta, GLfloat cosX, GLfloat sinX, GLfloat cosY, GLfloat sinY, mat4 m){
 	mat4 temp1, temp2, temp3;
-	matrixTranslation(-point[0],-point[1],-point[2], temp1);
+	matrixTranslation(point[0],point[1],point[2], temp1);
 
 	identityMatrix(temp2);
 	temp2[5] = cosX;
@@ -371,6 +371,60 @@ void matrixRotateVector(vec4 point, GLfloat theta, GLfloat cosX, GLfloat sinX, G
 	temp1[10] = cosX;
 	matrixMultiplication(temp2, temp1, temp3);
 	
-	matrixTranslation(point[0],point[1],point[2], temp1);
+	matrixTranslation(-point[0],-point[1],-point[2], temp1);
 	matrixMultiplication(temp3, temp1,  m);
+}
+
+void lookAt(vec4 e, vec4 a, vec4 vup, mat4 m) {
+	vec4 n, u, v;
+	identityMatrix(m);
+	if(vectorMagnitude(e) == 0) return;
+	vectorSubtraction(e,a,n);
+	vectorNormalize(n,n);
+	
+	vectorCrossProduct(vup,n,u);
+	vectorNormalize(u,u);
+
+	vectorCrossProduct(n,u,v);
+
+	m[0] = u[0];
+	m[4] = u[1];
+	m[8] = u[2];
+	m[1] = v[0];
+	m[5] = v[1];
+	m[9] = v[2];
+	m[2] = n[0];
+	m[6] = n[1];
+	m[10] = n[2];
+	m[3] = e[0];
+	m[7] = e[1];
+	m[11] = e[2];
+	//printMatrix(m);
+	mat4 temp;
+	matrixTranspose(m, temp);
+	//printMatrix(temp);
+	matrixInverse(temp, m);
+	//printMatrix(m);
+}
+
+void ortho(vec4 lrb, vec4 tnf, mat4 m) {
+	identityMatrix(m);
+	m[0] = 2/(lrb[1]-lrb[0]);
+	m[5] = 2/(tnf[0]-lrb[2]);
+	m[10] = 2/(tnf[1]-tnf[2]);
+	m[12] = -(lrb[1]+lrb[0])/(lrb[1]-lrb[0]);
+	m[13] = -(tnf[0]+lrb[2])/(tnf[0]-lrb[2]);
+	m[14] = -(tnf[1]+tnf[2])/(tnf[1]-tnf[2]);
+}
+
+void frustum(vec4 lrb, vec4 tnf, mat4 m) {
+	identityMatrix(m);
+	m[0] = (-2*tnf[1])/(lrb[1]-lrb[0]);
+	m[5] = (-2*tnf[1])/(tnf[0]-lrb[2]);
+	m[8] = (lrb[0]+lrb[1])/(lrb[1]-lrb[0]);
+	m[9] = (lrb[2]+tnf[0])/(tnf[0]-lrb[2]);
+	m[10] = (tnf[1]+tnf[2])/(tnf[2]-tnf[1]);
+	m[11] = -1;
+	m[14] = -(2*tnf[1]*tnf[2])/(tnf[2]-tnf[1]);
+	m[15] = 1;
 }
