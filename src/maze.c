@@ -34,6 +34,7 @@ typedef GLfloat mat4[16];
 typedef GLfloat vec2[2];
 
 int num_vertices = 0;
+GLfloat angle = 0.0;
 GLfloat theta = 0.01;
 GLuint model_view_location, projection_location, ctm_location;
 mat4 model_view, projection, ctm;
@@ -84,66 +85,66 @@ void makeWall(vec4 *vertices, vec2 *textures, int *v_index, int *t_index, int ro
 	matrixMultiplication(trans,scale,copy);
 	vec4 temp;
 	for(i = 0; i<36; i++){
-                matrixVectorMultiplication(copy,cube_vertices[i],temp);
+		matrixVectorMultiplication(copy,cube_vertices[i],temp);
 		vectorCopy(temp, vertices[*v_index]);
 		textures[*t_index][0] = wall_tex_coords[i][0];
 		textures[*t_index][1] = wall_tex_coords[i][1];
-                (*v_index)++;
+		(*v_index)++;
 		(*t_index)++;
-        }	
+	}	
 }
 
 void makeWallRotated(vec4 *vertices, vec2 *textures, int *v_index, int *t_index, int row, int col){
 	int i;
 	mat4 trans, scale, rotate, copy, temp1;
-	matrixTranslation((col*1)-3.75,0.0,row*-1,trans);
+	matrixTranslation((col*1)-3.8,0.0,row*-1,trans);
 	matrixRotateY(M_PI/2,rotate);
 	matrixMultiplication(trans,rotate,temp1);
 	matrixScale(1.0,1.0,0.2,scale);
 	matrixMultiplication(temp1,scale,copy);
 	vec4 temp;
 	for(i = 0; i<36; i++){
-                matrixVectorMultiplication(copy,cube_vertices[i],temp);
+		matrixVectorMultiplication(copy,cube_vertices[i],temp);
 		vectorCopy(temp, vertices[*v_index]);
 		textures[*t_index][0] = wall_tex_coords[i][0];
 		textures[*t_index][1] = wall_tex_coords[i][1];
-                (*v_index)++;
+		(*v_index)++;
 		(*t_index)++;
-        }	
+	}	
 }
 
 void makePost(vec4 *vertices, vec2 *textures, int *v_index, int *t_index, int row, int col){
 	int i;
 	mat4 trans, scale, copy;
-	matrixTranslation((col*1)-4.0,0.0,(row*-1)+0.05,trans);
-	matrixScale(0.3,1.0,0.3,scale);
+	matrixTranslation((col*1)-4.05,0.0,(row*-1)+0.05,trans);
+	matrixScale(0.3,1.1,0.3,scale);
 	matrixMultiplication(trans,scale,copy);
 	vec4 temp;
 	for(i = 0; i<36; i++){
-                matrixVectorMultiplication(copy,cube_vertices[i],temp);
+		matrixVectorMultiplication(copy,cube_vertices[i],temp);
 		vectorCopy(temp, vertices[*v_index]);
 		textures[*t_index][0] = post_tex_coords[i][0];
 		textures[*t_index][1] = post_tex_coords[i][1];
-                (*v_index)++;
+		(*v_index)++;
 		(*t_index)++;
-        }	
+	}	
 
 }
 void makeFloor(vec4 *vertices, vec2 *textures, int *v_index, int *t_index){
 	int i;
 	mat4 trans, scale, copy;
-	matrixTranslation(-4.5,-0.25,0.5,trans);
-	matrixScale(9.0,0.25,9.0,scale);
+	matrixTranslation(-6,-0.25,2.0,trans);
+	matrixScale(12.0,0.25,12.0,scale);
 	matrixMultiplication(trans,scale,copy);
 	vec4 temp;
 	for(i = 0; i<36; i++){
-                matrixVectorMultiplication(copy,cube_vertices[i],temp);
+		matrixVectorMultiplication(copy,cube_vertices[i],temp);
 		vectorCopy(temp, vertices[*v_index]);
 		textures[*t_index][0] = floor_tex_coords[i][0];
 		textures[*t_index][1] = floor_tex_coords[i][1];
-                (*v_index)++;
+		(*v_index)++;
 		(*t_index)++;
-        }	
+	}	
 
 }
 
@@ -221,9 +222,9 @@ void init(void)
 	glVertexAttribPointer(vPosition, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
 
 	/*GLuint vColor = glGetAttribLocation(program, "vColor");
-	glEnableVertexAttribArray(vColor);
-	glVertexAttribPointer(vColor, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid *) sizeof(vertices));
-	*/
+	  glEnableVertexAttribArray(vColor);
+	  glVertexAttribPointer(vColor, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid *) sizeof(vertices));
+	 */
 	GLuint vTexCoord = glGetAttribLocation(program, "vTexCoord");
 	glEnableVertexAttribArray(vTexCoord);
 	glVertexAttribPointer(vTexCoord, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid *) 0 + (sizeof(vertices)/* + sizeof(colors)*/));
@@ -232,13 +233,13 @@ void init(void)
 	glUniform1i(texture_location, 0);
 
 	identityMatrix(model_view);
-	vec4 e = {-4.0,3.0,1.5,0.0};
+	vec4 e = {0,5.0,3.0,0.0};
 	vec4 a = {0.0,0.0,-4,0.0};
 	vec4 vup = {0.0,1.0,0.0,0.0};
 	lookAt(e,a,vup,model_view);
 	//identityMatrix(projection);
-	vec4 lrb = {-1,1,-1,0.0};
-	vec4 tnf = {1,-1.0,-9,0.0};
+	vec4 lrb = {-0.7,0.7,-0.7,0.0};
+	vec4 tnf = {0.7,-1.0,-10,0.0};
 	frustum(lrb,tnf,projection);
 	identityMatrix(ctm);
 	model_view_location = glGetUniformLocation(program, "model_view_matrix");
@@ -271,23 +272,36 @@ void keyboard(unsigned char key, int mousex, int mousey)
 {
 	if(key == 'q')
 		exit(0);
+	if(key == 'c'){
+		GLfloat i,j,k;
+		scanf("%f %f %f", &i,&j,&k);
+		vec4 lrb = {i,j,k,0.0};
+		scanf("%f %f %f", &i,&j,&k);
+		vec4 tnf = {i,j,k,0.0};
+		identityMatrix(projection);
+		frustum(lrb,tnf,projection);
+		glutPostRedisplay();
+	}
 
 	//glutPostRedisplay();
 }
 
 void idle(void) {
-	mat4 temp, copy;
-	matrixRotateY(theta, temp);
-	matrixMultiplication( temp, ctm, copy);
-	matrixCopy(copy, ctm);
-	//glutPostRedisplay();
+	GLfloat x = cos(angle) * 7;
+	GLfloat z = -4 + sin(angle) * 7;
+	angle+=theta;
+	vec4 e = {x,5.0,z,0.0};
+	vec4 a = {0.0,0.0,-4,0.0};
+	vec4 vup = {0.0,1.0,0.0,0.0};
+	lookAt(e,a,vup,model_view);
+	glutPostRedisplay();
 }
 
 int main(int argc, char **argv)
 {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
-	glutInitWindowSize(512, 512);
+	glutInitWindowSize(1024, 1024);
 	glutInitWindowPosition(100,100);
 	glutCreateWindow("Maze");
 	glewInit();
