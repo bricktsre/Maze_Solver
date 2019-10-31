@@ -232,14 +232,14 @@ void init(void)
 	glUniform1i(texture_location, 0);
 
 	identityMatrix(model_view);
-	vec4 e = {0.0,2.0,-4.0,0.0};
+	vec4 e = {-4.0,3.0,1.5,0.0};
 	vec4 a = {0.0,0.0,-4,0.0};
-	vec4 vup = {0.0,0.0,-1.0,0.0};
+	vec4 vup = {0.0,1.0,0.0,0.0};
 	lookAt(e,a,vup,model_view);
 	//identityMatrix(projection);
-	vec4 lrb = {-4.5,4.5,-4.5,0.0};
-	vec4 tnf = {4.5,1.0,-8.5,0.0};
-	ortho(lrb,tnf,projection);
+	vec4 lrb = {-1,1,-1,0.0};
+	vec4 tnf = {1,-1.0,-9,0.0};
+	frustum(lrb,tnf,projection);
 	identityMatrix(ctm);
 	model_view_location = glGetUniformLocation(program, "model_view_matrix");
 	projection_location = glGetUniformLocation(program, "projection_matrix");
