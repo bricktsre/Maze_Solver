@@ -34,10 +34,11 @@ typedef GLfloat mat4[16];
 typedef GLfloat vec2[2];
 
 int num_vertices = 0;
-GLfloat angle = 0.0;
-GLfloat theta = 0.01;
+GLfloat angle = 0.0, phi = 0.0;
 GLuint model_view_location, projection_location, ctm_location;
 mat4 model_view, projection, ctm;
+int circle=1, move_down=0, forward=0, left=0, right=0;
+int stage = 0;
 vec4 cube_vertices[36] = {
 	{0.0,1.0,0.0,1.0},{0.0,0.0,0.0,1.0},{1.0,0.0,0.0,1.0},
 	{0.0,1.0,0.0,1.0},{1.0,0.0,0.0,1.0},{1.0,1.0,0.0,1.0},
@@ -233,7 +234,7 @@ void init(void)
 	glUniform1i(texture_location, 0);
 
 	identityMatrix(model_view);
-	vec4 e = {0,5.0,3.0,0.0};
+	vec4 e = {0,5.0,4.0,0.0};
 	vec4 a = {0.0,0.0,-4,0.0};
 	vec4 vup = {0.0,1.0,0.0,0.0};
 	lookAt(e,a,vup,model_view);
@@ -287,13 +288,59 @@ void keyboard(unsigned char key, int mousex, int mousey)
 }
 
 void idle(void) {
-	GLfloat x = cos(angle) * 7;
-	GLfloat z = -4 + sin(angle) * 7;
-	angle+=theta;
-	vec4 e = {x,5.0,z,0.0};
-	vec4 a = {0.0,0.0,-4,0.0};
-	vec4 vup = {0.0,1.0,0.0,0.0};
-	lookAt(e,a,vup,model_view);
+	if(circle){
+		GLfloat x = -sin(angle) * 8;
+		GLfloat z = -4 + cos(angle) * 8;
+		vec4 e = {x,5.0,z,0.0};
+		vec4 a = {0.0,0.0,-4,0.0};
+		vec4 vup = {0.0,1.0,0.0,0.0};
+		lookAt(e,a,vup,model_view);
+		angle+=0.1;
+		if(angle > M_PI*2){
+			circle = 0;
+			move_down = 1;
+		}	
+	} else if(move_down){
+		if(stage == 0){
+			GLfloat x = -sin(angle) * 8;
+			GLfloat z = -4 + cos(angle) * 8;
+			vec4 e = {x,5.0,z,0.0};
+			vec4 a = {0.0,0.0,-4,0.0};
+			vec4 vup = {0.0,1.0,0.0,0.0};
+			lookAt(e,a,vup,model_view);
+			angle+=0.01;
+			if(z <= -0.5 ){
+				stage=1;
+				angle = M_PI;
+			}
+		}else{		
+			GLfloat ex = 2.6*cos(angle) - 4.5;
+			GLfloat ey = 3.4*sin(angle) + 4.0;
+			vec4 e = {ex,ey,-0.5,0.0};
+			GLfloat ax = 3.5*cos(angle)*cos(phi);
+			GLfloat ay = 0.6 + 0.6*cos(angle)*sin(phi);
+			GLfloat az = -4 - 3.5 * sin(angle);
+			vec4 a = {ax,ay,az,0.0};
+			vec4 vup = {0.0,1.0,0.0,0.0};
+			lookAt(e,a,vup,model_view);
+			angle+=0.01;
+			phi+=0.01;
+			if(ex >= -4.52 || ey <= 0.75 ){
+				move_down=0;
+				vec4 e = {-4.5,0.6,-0.5,0.0};
+				vec4 a = {-3.5,0.6,-0.5,0.0};
+				vec4 vup = {0.0,1.0,0.0,0.0};
+				lookAt(e,a,vup,model_view);	
+				vec4 lrb = {-0.5,0.5,-0.5,0.0};
+				vec4 tnf = {0.5,-0.8,-10,0.0};
+				frustum(lrb,tnf,projection);
+			}
+		}
+	} else if(forward){
+	} else if(right){
+	} else if(left){
+	} else{
+	}
 	glutPostRedisplay();
 }
 
