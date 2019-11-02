@@ -26,6 +26,7 @@
 #include <time.h>
 #include "matrixOperations.h"
 #include "mazeGenerator.h"
+#include "mazeSolver.h"
 
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
@@ -177,6 +178,8 @@ void init(void)
 {
 	int maze[17][17];
 	makeMaze(maze);
+	char solution[60];
+	solveMaze(maze, solution);
 	num_vertices = 5796;
 	vec4 vertices[num_vertices];
 	vec2 textures[num_vertices];
