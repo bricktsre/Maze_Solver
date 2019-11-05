@@ -35,11 +35,12 @@ typedef GLfloat mat4[16];
 typedef GLfloat vec2[2];
 
 int num_vertices = 0;
-GLfloat angle = 0.0, phi = 0.0;
+GLfloat angle = 0.0, phi = 0.0, step = 0.0;
 GLuint model_view_location, projection_location, ctm_location;
 mat4 model_view, projection, ctm;
 int circle=1, move_down=0, forward=0, left=0, right=0;
-int stage = 0;
+int stage = 0, direction =3;
+vec4 old_a, old_e;
 vec4 cube_vertices[36] = {
 	{0.0,1.0,0.0,1.0},{0.0,0.0,0.0,1.0},{1.0,0.0,0.0,1.0},
 	{0.0,1.0,0.0,1.0},{1.0,0.0,0.0,1.0},{1.0,1.0,0.0,1.0},
@@ -337,10 +338,69 @@ void idle(void) {
 				vec4 lrb = {-0.5,0.5,-0.5,0.0};
 				vec4 tnf = {0.5,-0.8,-10,0.0};
 				frustum(lrb,tnf,projection);
+				right = 1;
+				angle = 0;
+				vectorCopy(e,old_e);
+				vectorCopy(a,old_a);
 			}
 		}
 	} else if(forward){
+		vec4 e_move, a_move;
+		if(direction == 3){
+			vec4 e_point = {old_e[0]+1,0.6,old_e[2],0.0};
+			vec4 a_point = {old_a[0]+1,0.6,old_a[2],0.0};
+			vectorSubtraction(e_point,old_e,e_move);
+			vectorSubtraction(a_point,old_a,a_move);
+		}else if(direction == 2){
+			vec4 e_point = {old_e[0],0.6,old_e[2]-1,0.0};
+			vec4 a_point = {old_a[0],0.6,old_a[2]-1,0.0};
+			vectorSubtraction(e_point,old_e,e_move);
+			vectorSubtraction(a_point,old_a,a_move);
+		}else{
+			vec4 e_point = {old_e[0]-1,0.6,old_e[2],0.0};
+			vec4 a_point = {old_a[0]-1,0.6,old_a[2],0.0};
+			vectorSubtraction(e_point,old_e,e_move);
+			vectorSubtraction(a_point,old_a,a_move);
+		}
+		vectorScalarMultiplication(e_move,step,e_move);
+		vectorScalarMultiplication(a_move,step,a_move);
+		vectorAddition(old_e,e_move,e_move);
+		vectorAddition(old_a,a_move,a_move);
+		vec4 vup = {0,1,0,0};
+		lookAt(e_move,a_move,vup,model_view);
+		step += 0.01;
+		if(step > 1.0){
+			vectorCopy(e_move, old_e);
+			vectorCopy(a_move, old_a);
+			forward = 0;
+		}
 	} else if(right){
+			GLfloat ax,az;
+			if(direction == 2){
+				ax = cos(angle-(M_PI/2)) + old_e[0];
+				az = sin(angle) + old_e[2];
+			}else if(direction == 1){
+				ax = cos(angle-(M_PI/2)) + old_e[0];
+				az = -sin(angle) + old_e[2];
+			}else if(direction == 3){
+				ax = cos(angle) + old_e[0];
+				az = sin(angle) + old_e[2];
+			}
+			vec4 a = {ax,0.6,az,0.0};
+			printVector(a);
+			//vectorAddition(old_e,new_e,new_e);
+			vec4 vup = {0.0,1.0,0.0,0.0};
+			lookAt(old_e,a,vup,model_view);
+			angle+=0.01;
+			if(angle > M_PI/2){
+				vec4 e = {-4.5,0.6,-0.5,0.0};
+				vec4 a = {-3.5,0.6,-0.5,0.0};
+				vec4 vup = {0.0,1.0,0.0,0.0};
+				lookAt(e,a,vup,model_view);	
+				right = 0;
+				vectorCopy(e,old_e);
+				vectorCopy(a,old_a);
+			}
 	} else if(left){
 	} else{
 	}

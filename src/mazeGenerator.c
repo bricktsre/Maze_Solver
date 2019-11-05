@@ -12,7 +12,7 @@ void makeMaze(int maze[][17]) {
 	maze[1][0] = 0;
 	maze[17-2][17-1] = 0;
 	addPosts(maze);
-	printMaze(maze);
+	//printMaze(maze);
 }
 
 void mazeInit(int maze[][17]) {
