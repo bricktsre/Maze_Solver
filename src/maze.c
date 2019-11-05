@@ -39,8 +39,10 @@ GLfloat angle = 0.0, phi = 0.0, step = 0.0;
 GLuint model_view_location, projection_location, ctm_location;
 mat4 model_view, projection, ctm;
 int circle=1, move_down=0, forward=0, left=0, right=0;
-int stage = 0, direction =3;
+int stage = 0, direction =3, new_direction = -1, sol_count = 0, last_f = 0;
 vec4 old_a, old_e;
+char solution[60];
+
 vec4 cube_vertices[36] = {
 	{0.0,1.0,0.0,1.0},{0.0,0.0,0.0,1.0},{1.0,0.0,0.0,1.0},
 	{0.0,1.0,0.0,1.0},{1.0,0.0,0.0,1.0},{1.0,1.0,0.0,1.0},
@@ -179,7 +181,6 @@ void init(void)
 {
 	int maze[17][17];
 	makeMaze(maze);
-	char solution[60];
 	solveMaze(maze, solution);
 	num_vertices = 5796;
 	vec4 vertices[num_vertices];
@@ -329,7 +330,7 @@ void idle(void) {
 			lookAt(e,a,vup,model_view);
 			angle+=0.01;
 			phi+=0.01;
-			if(ex >= -4.52 || ey <= 0.75 ){
+			if(angle > (3*M_PI)/2){//ex >= -4.52 || ey <= 0.75 ){
 				move_down=0;
 				vec4 e = {-4.5,0.6,-0.5,0.0};
 				vec4 a = {-3.5,0.6,-0.5,0.0};
@@ -338,8 +339,6 @@ void idle(void) {
 				vec4 lrb = {-0.5,0.5,-0.5,0.0};
 				vec4 tnf = {0.5,-0.8,-10,0.0};
 				frustum(lrb,tnf,projection);
-				right = 1;
-				angle = 0;
 				vectorCopy(e,old_e);
 				vectorCopy(a,old_a);
 			}
@@ -356,9 +355,14 @@ void idle(void) {
 			vec4 a_point = {old_a[0],0.6,old_a[2]-1,0.0};
 			vectorSubtraction(e_point,old_e,e_move);
 			vectorSubtraction(a_point,old_a,a_move);
-		}else{
+		}else if(direction == 1){
 			vec4 e_point = {old_e[0]-1,0.6,old_e[2],0.0};
 			vec4 a_point = {old_a[0]-1,0.6,old_a[2],0.0};
+			vectorSubtraction(e_point,old_e,e_move);
+			vectorSubtraction(a_point,old_a,a_move);
+		}else{
+			vec4 e_point = {old_e[0],0.6,old_e[2]+1,0.0};
+			vec4 a_point = {old_a[0],0.6,old_a[2]+1,0.0};
 			vectorSubtraction(e_point,old_e,e_move);
 			vectorSubtraction(a_point,old_a,a_move);
 		}
@@ -368,41 +372,109 @@ void idle(void) {
 		vectorAddition(old_a,a_move,a_move);
 		vec4 vup = {0,1,0,0};
 		lookAt(e_move,a_move,vup,model_view);
+		//printVector(a_move);
 		step += 0.01;
 		if(step > 1.0){
 			vectorCopy(e_move, old_e);
 			vectorCopy(a_move, old_a);
 			forward = 0;
+			step = 0.0;
 		}
 	} else if(right){
 			GLfloat ax,az;
 			if(direction == 2){
-				ax = cos(angle-(M_PI/2)) + old_e[0];
-				az = sin(angle) + old_e[2];
+				ax = sin(angle) + old_e[0];
+				az = -cos(angle) + old_e[2];
+				new_direction = 3;
 			}else if(direction == 1){
-				ax = cos(angle-(M_PI/2)) + old_e[0];
+				ax = cos(angle) + old_e[0];
 				az = -sin(angle) + old_e[2];
+				new_direction = 2;
 			}else if(direction == 3){
 				ax = cos(angle) + old_e[0];
 				az = sin(angle) + old_e[2];
+				new_direction = 0;
+			}else{
+				ax = -sin(angle) + old_e[0];
+				az = cos(angle) + old_e[2];
+				new_direction = 1;
 			}
 			vec4 a = {ax,0.6,az,0.0};
-			printVector(a);
-			//vectorAddition(old_e,new_e,new_e);
 			vec4 vup = {0.0,1.0,0.0,0.0};
 			lookAt(old_e,a,vup,model_view);
 			angle+=0.01;
 			if(angle > M_PI/2){
-				vec4 e = {-4.5,0.6,-0.5,0.0};
-				vec4 a = {-3.5,0.6,-0.5,0.0};
-				vec4 vup = {0.0,1.0,0.0,0.0};
-				lookAt(e,a,vup,model_view);	
+				//vec4 e = {-4.5,0.6,-0.5,0.0};
+				//vec4 a = {-3.5,0.6,-0.5,0.0};
+				//vec4 vup = {0.0,1.0,0.0,0.0};
+				//lookAt(e,a,vup,model_view);	
 				right = 0;
-				vectorCopy(e,old_e);
+				forward = 1;
+				direction = new_direction;
+				//vectorCopy(e,old_e);
 				vectorCopy(a,old_a);
 			}
 	} else if(left){
+			GLfloat ax,az;
+			if(direction == 2){
+				ax = -sin(angle) + old_e[0];
+				az = cos(angle) + old_e[2];
+				new_direction = 1;
+			}else if(direction == 1){
+				ax = cos(angle) + old_e[0];
+				az = sin(angle) + old_e[2];
+				new_direction = 0;
+			}else if(direction == 3){
+				ax = cos(angle) + old_e[0];
+				az = -sin(angle) + old_e[2];
+				new_direction = 2;
+			}else{
+				ax = sin(angle) + old_e[0];
+				az = cos(angle) + old_e[2];
+				new_direction = 3;
+			}
+			vec4 a = {ax,0.6,az,0.0};
+			vec4 vup = {0.0,1.0,0.0,0.0};
+			lookAt(old_e,a,vup,model_view);
+			angle+=0.01;
+			if(angle > M_PI/2){
+				//vec4 e = {-4.5,0.6,-0.5,0.0};
+				//vec4 a = {-3.5,0.6,-0.5,0.0};
+				//vec4 vup = {0.0,1.0,0.0,0.0};
+				//lookAt(e,a,vup,model_view);	
+				left = 0;
+				forward=1;
+				direction = new_direction;
+				//vectorCopy(e,old_e);
+				vectorCopy(a,old_a);
+			}
 	} else{
+		if(sol_count < 60){
+			char c = solution[sol_count];
+			angle = 0;
+			if( c == '\0'){
+				sol_count = 60;
+				return;
+			}else if(c == 'F'){
+				if(last_f){
+					last_f = 0;
+					sol_count++;
+					return;
+				}
+				forward = 1;
+				last_f = 1;
+				fprintf(stderr,"Forward, Direction: %d\n",direction);
+			}else if(c == 'R'){
+				right = 1;
+				last_f =1;
+				fprintf(stderr,"Right, Direction: %d\n", direction);
+			}else if(c == 'L'){
+				left = 1;
+				last_f=1;
+				fprintf(stderr,"Left, Direction: %d\n",direction);
+			}
+			sol_count++;
+		}			
 	}
 	glutPostRedisplay();
 }

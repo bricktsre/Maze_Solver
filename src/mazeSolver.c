@@ -1,15 +1,15 @@
 #include "mazeSolver.h"
-//#include <stdio.h>
+#include <stdio.h>
 
 void solveMaze(int maze[][17], char solution[]){
-	solution[0] = 'F';
-	int at = 0;
+	//solution[0] = 'F';
+	int at = -1;
 	solveRecursive(maze,1,solution,&at,1,0);
 	//printf("At: %d\n",at);
 	//solution[++at] = 'L';
 	//solution[++at] = 'L';
 	solution[++at] = '\0';
-	//printf("%s\n",solution);
+	printf("%s\n",solution);
 }
 
 // Direction Right = 1, Down = 2, Left = 3, Up = 0;
